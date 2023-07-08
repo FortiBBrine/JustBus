@@ -1,0 +1,23 @@
+messages:
+  permission: "§4Ошибка: §fУ вас нет прав."
+
+bus:
+  world: world
+  x: 0
+  y: 0
+  z: 0
+
+inventory:
+  title: "Варп: %warp"
+  teleport:
+    material: ENDER_PEARL
+    name: "Телепорт"
+    lore: []
+  drive:
+    material: MINECART
+    name: "Ехать"
+    lore: []
+  gps:
+    material: COMPASS
+    name: "GPS"
+    lore: []

@@ -1,0 +1,35 @@
+name: JustBus
+version: '${project.version}'
+main: me.fortibrine.justbus.JustBus
+api-version: 1.16
+
+author: IJustFortiLive
+
+commands:
+  warp:
+    usage: "§7/warp [Название]"
+    aliases: [uber, warp]
+
+depend: [EssentialsX]
+
+permissions:
+  justbus.*:
+    description: "All permissions"
+    default: op
+    children:
+      justbus.warp: true
+      justbus.teleport: true
+      justbus.drive: true
+      justbus.gps: true
+  justbus.warp:
+    description: "Permission to warp"
+    default: true
+  justbus.teleport:
+    description: "Teleport"
+    default: op
+  justbus.drive:
+    description: "Drive"
+    default: true
+  justbus.gps:
+    description: "GPS"
+    default: true
