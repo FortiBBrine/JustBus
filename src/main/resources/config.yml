@@ -1,6 +1,8 @@
 messages:
   permission: "§4Ошибка: §fУ вас нет прав."
 
+gps: "x = %x y = %y z = %z ()"
+
 bus:
   world: world
   x: 0

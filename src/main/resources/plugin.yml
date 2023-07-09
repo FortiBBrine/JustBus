@@ -10,7 +10,7 @@ commands:
     usage: "§7/warp [Название]"
     aliases: [uber, warp]
 
-depend: [EssentialsX]
+depend: [Essentials]
 
 permissions:
   justbus.*:

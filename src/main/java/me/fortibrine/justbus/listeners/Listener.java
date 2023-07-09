@@ -101,6 +101,8 @@ public class Listener implements org.bukkit.event.Listener {
 
         Map<Player, Inventory> inventories = plugin.getInventories();
         Map<Player, String> warps = plugin.getWarps();
+        Map<Player, Integer> time = plugin.getTime();
+        Map<Player, Location> gps = plugin.getGPS();
 
         if (inventories.containsKey(player)) {
             inventories.remove(player);
@@ -109,6 +111,14 @@ public class Listener implements org.bukkit.event.Listener {
         if (warps.containsKey(player)) {
             warps.remove(player);
             plugin.setWarps(warps);
+        }
+        if (time.containsKey(player)) {
+            time.remove(player);
+            plugin.setTime(time);
+        }
+        if (gps.containsKey(player)) {
+            gps.remove(player);
+            plugin.setGPS(gps);
         }
     }
 

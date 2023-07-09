@@ -1,6 +1,9 @@
 package me.fortibrine.justbus;
 
 import me.fortibrine.justbus.commands.CommandWarp;
+import me.fortibrine.justbus.listeners.Listener;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -38,7 +41,7 @@ public class JustBus extends JavaPlugin {
 //            return;
 //        }
 
-        essentials = (Essentials) Bukkit.getPluginManager().getPlugin("EssentialsX");
+        essentials = (Essentials) pluginManager.getPlugin("Essentials");
 
         File config = new File(this.getDataFolder() + File.separator + "config.yml");
         if (!config.exists()) {
@@ -48,9 +51,34 @@ public class JustBus extends JavaPlugin {
 
         this.getCommand("warp").setExecutor(new CommandWarp(this));
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+        pluginManager.registerEvents(new Listener(this), this);
 
-        }, 3 * 20L, 0L);
+        int couldown = 3;
+
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            for (Player player : this.gps.keySet()) {
+                Location playerLocation = player.getLocation();
+                Location currentLocation = this.gps.get(player);
+                String message = this.getConfig().getString("gps")
+                        .replace("%x", String.valueOf((int) currentLocation.getX()))
+                        .replace("%y", String.valueOf((int) currentLocation.getY()))
+                        .replace("%z", String.valueOf((int) currentLocation.getZ()))
+                        .replace("%distance", String.valueOf((int) playerLocation.distance(currentLocation)));
+                player.spigot().sendMessage(
+                        ChatMessageType.ACTION_BAR,
+                        TextComponent.fromLegacyText(message));
+            }
+
+            for (Player player : this.time.keySet()) {
+                int time = this.time.get(player);
+
+                time -= couldown;
+
+                if (time <= 0) {
+                    this.time.remove(player);
+                }
+            }
+        }, couldown * 20L, 0L);
 
     }
 
