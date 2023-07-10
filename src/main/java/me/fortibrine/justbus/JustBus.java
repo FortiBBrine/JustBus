@@ -122,10 +122,10 @@ public class JustBus extends JavaPlugin {
                         .replace("%m", String.valueOf(minutes))
                         .replace("%s", String.valueOf(seconds));
 
-                player.sendTitle(title, subtitle, 0, couldown, 0);
+                player.sendTitle(title, subtitle, 0, couldown * 20, 0);
 
             }
-        }, couldown * 20L, 0L);
+        }, couldown * 20L, couldown * 20L);
 
     }
 
