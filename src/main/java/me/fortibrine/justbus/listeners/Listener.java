@@ -48,6 +48,8 @@ public class Listener implements org.bukkit.event.Listener {
 
         Location warp = essentials.getWarps().getWarp(warps.get(player));
 
+        player.closeInventory();
+
         switch (event.getSlot()) {
             case (10):
 
@@ -57,9 +59,10 @@ public class Listener implements org.bukkit.event.Listener {
                 }
 
                 player.teleport(warp);
+                player.sendMessage(config.getString("messages.teleport"));
 
                 break;
-            case (12):
+            case (13):
 
                 if (!player.hasPermission(plugin.getDescription().getPermissions().get(3))) {
                     player.sendMessage(config.getString("messages.permission"));
@@ -81,7 +84,7 @@ public class Listener implements org.bukkit.event.Listener {
                 player.teleport(bus);
 
                 break;
-            case (14):
+            case (16):
 
                 if (!player.hasPermission(plugin.getDescription().getPermissions().get(4))) {
                     player.sendMessage(config.getString("messages.permission"));

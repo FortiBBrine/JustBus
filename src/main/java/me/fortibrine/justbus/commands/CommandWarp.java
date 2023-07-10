@@ -1,5 +1,6 @@
 package me.fortibrine.justbus.commands;
 
+import com.earth2me.essentials.Essentials;
 import me.fortibrine.justbus.JustBus;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -35,6 +36,13 @@ public class CommandWarp implements CommandExecutor {
 
         if (args.length < 1) {
             return false;
+        }
+
+        Essentials essentials = plugin.getEssentials();
+
+        if (!essentials.getWarps().getList().contains(args[0])) {
+            player.sendMessage(config.getString("messages.unknown"));
+            return true;
         }
 
         Inventory inventory = plugin.generateInventory(args[0]);

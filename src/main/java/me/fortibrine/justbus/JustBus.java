@@ -1,7 +1,9 @@
 package me.fortibrine.justbus;
 
+import com.earth2me.essentials.commands.WarpNotFoundException;
 import me.fortibrine.justbus.commands.CommandWarp;
 import me.fortibrine.justbus.listeners.Listener;
+import net.ess3.api.InvalidWorldException;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -59,11 +61,21 @@ public class JustBus extends JavaPlugin {
             for (Player player : this.gps.keySet()) {
                 Location playerLocation = player.getLocation();
                 Location currentLocation = this.gps.get(player);
+
+                int distance = (int) playerLocation.distance(currentLocation);
+
+                if (distance <= this.getConfig().getInt("radius")) {
+                    player.sendMessage(this.getConfig().getString("messages.end"));
+                    this.gps.remove(player);
+                    this.warps.remove(player);
+                    continue;
+                }
+
                 String message = this.getConfig().getString("gps")
                         .replace("%x", String.valueOf((int) currentLocation.getX()))
                         .replace("%y", String.valueOf((int) currentLocation.getY()))
                         .replace("%z", String.valueOf((int) currentLocation.getZ()))
-                        .replace("%distance", String.valueOf((int) playerLocation.distance(currentLocation)));
+                        .replace("%distance", String.valueOf(distance));
                 player.spigot().sendMessage(
                         ChatMessageType.ACTION_BAR,
                         TextComponent.fromLegacyText(message));
@@ -74,9 +86,44 @@ public class JustBus extends JavaPlugin {
 
                 time -= couldown;
 
+                this.time.put(player, time);
+
                 if (time <= 0) {
                     this.time.remove(player);
+
+                    try {
+                        Location warp = this.getEssentials().getWarps().getWarp(this.warps.get(player));
+                        player.teleport(warp);
+                    } catch (WarpNotFoundException | InvalidWorldException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    this.warps.remove(player);
+
+                    player.sendMessage(this.getConfig().getString("messages.bus"));
+
+                    continue;
                 }
+
+                int hours = time / 3600;
+                time %= 3600;
+                int minutes = time / 60;
+                time %= 60;
+                int seconds = time;
+
+                String title = this.getConfig().getString("bus.title");
+                String subtitle = this.getConfig().getString("bus.subtitle");
+
+                title = title.replace("%h", String.valueOf(hours))
+                        .replace("%m", String.valueOf(minutes))
+                        .replace("%s", String.valueOf(seconds));
+
+                subtitle = subtitle.replace("%h", String.valueOf(hours))
+                        .replace("%m", String.valueOf(minutes))
+                        .replace("%s", String.valueOf(seconds));
+
+                player.sendTitle(title, subtitle, 0, couldown, 0);
+
             }
         }, couldown * 20L, 0L);
 
@@ -176,8 +223,8 @@ public class JustBus extends JavaPlugin {
         gps.setItemMeta(gpsMeta);
 
         inventory.setItem(10, teleport);
-        inventory.setItem(12, drive);
-        inventory.setItem(14, gps);
+        inventory.setItem(13, drive);
+        inventory.setItem(16, gps);
 
         return inventory;
     }

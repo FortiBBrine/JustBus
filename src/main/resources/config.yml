@@ -1,12 +1,23 @@
 messages:
   permission: "§4Ошибка: §fУ вас нет прав."
+  unknown: "§4Ошибка: §fВарп не найден."
+  bus: "§fВы успешно приехали!"
+  teleport: "§7Телепортация прошла успешно!"
+  gps: "§7GPS настроен!"
+  end: "§7Вы успешно пришли к месту назначения"
 
-gps: "x = %x y = %y z = %z ()"
+radius: 5
+
+gps: "x = %x y = %y z = %z (%distance)"
 
 bus:
+
+  title: "Вы едите"
+  subtitle: "Осталось ехать %h часов %m минут %s секунд"
+
   world: world
   x: 0
-  y: 0
+  y: 80
   z: 0
 
 inventory:
