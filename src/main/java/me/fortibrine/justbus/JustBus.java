@@ -18,6 +18,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,9 @@ import com.earth2me.essentials.Essentials;
 public class JustBus extends JavaPlugin {
 
     private Map<Player, Inventory> inventories = new HashMap<>();
-    private Map<Player, String> warps = new HashMap<>();
+    private Map<Player, Location> warps = new HashMap<>();
     private Map<Player, Integer> time = new HashMap<>();
-    private Map<Player, Location> gps = new HashMap<>();
+    private List<Player> gps = new ArrayList<>();
 
     private Essentials essentials;
 
@@ -58,16 +59,23 @@ public class JustBus extends JavaPlugin {
         int couldown = 3;
 
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-            for (Player player : this.gps.keySet()) {
+            List<Player> willBeDeleted = new ArrayList<>();
+            for (Player player : this.gps) {
                 Location playerLocation = player.getLocation();
-                Location currentLocation = this.gps.get(player);
+                Location currentLocation = this.warps.get(player);
+
+                if (currentLocation == null) {
+                    willBeDeleted.add(player);
+                    continue;
+                }
 
                 int distance = (int) playerLocation.distance(currentLocation);
 
                 if (distance <= this.getConfig().getInt("radius")) {
                     player.sendMessage(this.getConfig().getString("messages.end"));
-                    this.gps.remove(player);
+
                     this.warps.remove(player);
+                    this.gps.remove(player);
                     continue;
                 }
 
@@ -81,6 +89,13 @@ public class JustBus extends JavaPlugin {
                         TextComponent.fromLegacyText(message));
             }
 
+            for (Player player : willBeDeleted) {
+                this.gps.remove(player);
+                this.time.remove(player);
+                this.inventories.remove(player);
+                this.warps.remove(player);
+            }
+
             for (Player player : this.time.keySet()) {
                 int time = this.time.get(player);
 
@@ -91,12 +106,7 @@ public class JustBus extends JavaPlugin {
                 if (time <= 0) {
                     this.time.remove(player);
 
-                    try {
-                        Location warp = this.getEssentials().getWarps().getWarp(this.warps.get(player));
-                        player.teleport(warp);
-                    } catch (WarpNotFoundException | InvalidWorldException e) {
-                        throw new RuntimeException(e);
-                    }
+                    player.teleport(this.warps.get(player));
 
                     this.warps.remove(player);
 
@@ -141,11 +151,11 @@ public class JustBus extends JavaPlugin {
         return this.essentials;
     }
 
-    public Map<Player, String> getWarps() {
+    public Map<Player, Location> getWarps() {
         return this.warps;
     }
 
-    public void setWarps(Map<Player, String> warps) {
+    public void setWarps(Map<Player, Location> warps) {
         this.warps = warps;
     }
 
@@ -153,16 +163,16 @@ public class JustBus extends JavaPlugin {
         return this.time;
     }
 
-    public void setTime(Map<Player, Integer> time) {
-        this.time = time;
-    }
-
-    public Map<Player, Location> getGPS() {
+    public List<Player> getGPS() {
         return this.gps;
     }
 
-    public void setGPS(Map<Player, Location> gps) {
+    public void setGPS(List<Player> gps) {
         this.gps = gps;
+    }
+
+    public void setTime(Map<Player, Integer> time) {
+        this.time = time;
     }
 
     public Inventory generateInventory(String warpName) {

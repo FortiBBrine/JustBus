@@ -1,6 +1,5 @@
 package me.fortibrine.justbus.listeners;
 
-import com.earth2me.essentials.Essentials;
 import com.earth2me.essentials.commands.WarpNotFoundException;
 import me.fortibrine.justbus.JustBus;
 import net.ess3.api.InvalidWorldException;
@@ -11,9 +10,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 
+import java.util.List;
 import java.util.Map;
 
 public class Listener implements org.bukkit.event.Listener {
@@ -29,9 +31,9 @@ public class Listener implements org.bukkit.event.Listener {
 
         Player player = (Player) event.getWhoClicked();
         Map<Player, Inventory> inventories = plugin.getInventories();
-        Map<Player, String> warps = plugin.getWarps();
+        Map<Player, Location> warps = plugin.getWarps();
         Map<Player, Integer> time = plugin.getTime();
-        Map<Player, Location> gps = plugin.getGPS();
+        List<Player> gps = plugin.getGPS();
 
         Inventory inventory = inventories.get(player);
 
@@ -44,10 +46,6 @@ public class Listener implements org.bukkit.event.Listener {
             plugin.setInventories(inventories);
         }
 
-        Essentials essentials = plugin.getEssentials();
-
-        Location warp = essentials.getWarps().getWarp(warps.get(player));
-
         player.closeInventory();
 
         switch (event.getSlot()) {
@@ -58,8 +56,10 @@ public class Listener implements org.bukkit.event.Listener {
                     return;
                 }
 
-                player.teleport(warp);
+                player.teleport(warps.get(player));
                 player.sendMessage(config.getString("messages.teleport"));
+
+                warps.remove(player);
 
                 break;
             case (13):
@@ -69,7 +69,7 @@ public class Listener implements org.bukkit.event.Listener {
                     return;
                 }
 
-                int seconds = (int) player.getLocation().distance(warp) * 3;
+                int seconds = (int) player.getLocation().distance(warps.get(player)) * 3;
 
                 time.put(player, seconds);
 
@@ -91,11 +91,39 @@ public class Listener implements org.bukkit.event.Listener {
                     return;
                 }
 
-                gps.put(player, warp);
-                plugin.setGPS(gps);
+               gps.add(player);
 
                 break;
         }
+
+        plugin.setTime(time);
+        plugin.setWarps(warps);
+        plugin.setGPS(gps);
+    }
+
+    @EventHandler
+    public void onSwap(InventoryMoveItemEvent event) {
+        Player player = (Player) event.getInitiator().getViewers().get(0);
+        Map<Player, Inventory> inventories = plugin.getInventories();
+
+        Inventory inventory = inventories.get(player);
+
+        if (event.getSource() != inventory) return;
+        if (event.getDestination() != inventory) return;
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        Player player = (Player) event.getWhoClicked();
+        Map<Player, Inventory> inventories = plugin.getInventories();
+
+        Inventory inventory = inventories.get(player);
+
+        if (event.getInventory() != inventory) return;
+
+        event.setCancelled(true);
     }
 
     @EventHandler
@@ -103,9 +131,9 @@ public class Listener implements org.bukkit.event.Listener {
         Player player = event.getPlayer();
 
         Map<Player, Inventory> inventories = plugin.getInventories();
-        Map<Player, String> warps = plugin.getWarps();
+        Map<Player, Location> warps = plugin.getWarps();
         Map<Player, Integer> time = plugin.getTime();
-        Map<Player, Location> gps = plugin.getGPS();
+        List<Player> gps = plugin.getGPS();
 
         if (inventories.containsKey(player)) {
             inventories.remove(player);
@@ -119,7 +147,7 @@ public class Listener implements org.bukkit.event.Listener {
             time.remove(player);
             plugin.setTime(time);
         }
-        if (gps.containsKey(player)) {
+        if (gps.contains(player)) {
             gps.remove(player);
             plugin.setGPS(gps);
         }
